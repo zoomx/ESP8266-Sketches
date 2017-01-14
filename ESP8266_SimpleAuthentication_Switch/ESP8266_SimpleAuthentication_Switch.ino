@@ -11,6 +11,9 @@
    Blog: http://ashishrd.blogspot.com
 
    Modified for Wemos D1 and the Relay Shield wich pin is on D1
+   2014  01 27
+   Changed from authentification to authentication
+   http://english.stackexchange.com/questions/7844/is-authentification-a-real-word
 
    Todo
    Add wifi configuration using the code of Ashish Derhgawen
@@ -26,25 +29,25 @@
 //#define GPIO2 2
 const int relayPin = D1;
 
-const char* ssid = "YourSSID";
-const char* password = "YourPassword";
+const char* ssid = "your ssid";
+const char* password = "your password";
 
 ESP8266WebServer server(80);
 
 //******************************************************************************************
 //Check if header is present and correct
-bool is_authentified() {
-  Serial.println("Enter is_authentified");
+bool is_authenticated() {
+  Serial.println("Enter is_authenticated");
   if (server.hasHeader("Cookie")) {
     Serial.print("Found cookie: ");
     String cookie = server.header("Cookie");
     Serial.println(cookie);
     if (cookie.indexOf("ESPSESSIONID=1") != -1) {
-      Serial.println("Authentification Successful");
+      Serial.println("Authentication Successful");
       return true;
     }
   }
-  Serial.println("Authentification Failed");
+  Serial.println("Authentication Failed");
   return false;
 }
 
@@ -88,11 +91,11 @@ void handleLogin() {
 
                                       handleRoot
 *******************************************************************************************/
-//root page can be accessed only if authentification is ok
+//root page can be accessed only if authentication is ok
 void handleRoot() {
   Serial.println("Enter handleRoot");
   String header;
-  if (!is_authentified()) {
+  if (!is_authenticated()) {
     String header = "HTTP/1.1 301 OK\r\nLocation: /login\r\nCache-Control: no-cache\r\n\r\n";
     server.sendContent(header);
     return;
@@ -112,7 +115,7 @@ void handleRoot() {
 
                                       handleNotFound
 *******************************************************************************************/
-//no need authentification
+//no need authentication
 void handleNotFound() {
   String message = "File Not Found\n\n";
   message += "URI: ";
@@ -136,7 +139,7 @@ void handleNotFound() {
 /* GPIO page allows you to control the GPIO pins */
 void gpioPageHandler()
 {
-  if (!is_authentified()) {
+  if (!is_authenticated()) {
     String header = "HTTP/1.1 301 OK\r\nLocation: /login\r\nCache-Control: no-cache\r\n\r\n";
     server.sendContent(header);
     return;
@@ -222,7 +225,7 @@ void setup(void) {
   */
 
   WiFi.begin(ssid, password);
-  Serial.println("/r/nESP8266_SimpleAuthentification_Switch");
+  Serial.println("/r/nESP8266_SimpleAuthentication_Switch");
 
   // Wait for connection
   while (WiFi.status() != WL_CONNECTED) {
@@ -240,7 +243,7 @@ void setup(void) {
   server.on("/login", handleLogin);
   server.on("/gpio", gpioPageHandler);
   server.on("/inline", []() {
-    server.send(200, "text/plain", "this works without need of authentification");
+    server.send(200, "text/plain", "this works without need of authentication");
   });
 
   server.onNotFound(handleNotFound);
